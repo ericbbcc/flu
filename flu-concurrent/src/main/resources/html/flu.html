@@ -1,0 +1,124 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>线程池监控中心</title>
+
+    <script type="text/javascript" src="http://cdn.hcharts.cn/jquery/jquery-1.8.3.min.js"></script>
+    <style type="text/css">
+        ${demo.css}
+    </style>
+    <script type="text/javascript">
+        var lastDate = undefined;
+        var charts = new Object();
+        $(function () {
+            $.getJSON('/flu?poolKeys=get', function (data) {
+                initChartsTags(data);
+                $.getJSON('/flu?json=data', function (data) {
+                    for (var pooName in data) {
+                        charts[pooName] = makeCharts(pooName, data[pooName]);
+                    }
+                    setInterval(function () {
+                        var url = lastDate == undefined ? '/flu?json=data' : '/flu?json=data&fromDate=' + lastDate;
+                        $.getJSON(url, function (data) {
+                            for (var pooName in data) {
+                                var chart = $('#' + pooName).highcharts();
+                                var series = chart.series;
+                                for (var i = 0 ; i < data[pooName].length; i++) {
+                                    var serie = series[i];
+                                    var rserie = data[pooName][i];
+                                    rserie.data.forEach(function (item) {
+                                        lastDate = item[0];
+                                        serie.addPoint([lastDate, item[1]], true, true);
+                                    });
+                                }
+                            }
+                        });
+                    }, 1000);
+                });
+            });
+        });
+
+        function initChartsTags(data) {
+            var body = document.body;
+            data.forEach(function (poolName) {
+                var poolTag = document.createElement("DIV");
+                poolTag.setAttribute("class", "pool");
+                poolTag.setAttribute("id", poolName);
+                poolTag.setAttribute("style", 'min-width: 310px; height: 400px; margin: 0 auto');
+                body.appendChild(poolTag);
+            });
+        }
+        function makeCharts(poolName, data) {
+            return $('#' + poolName).highcharts({
+                chart: {
+                    zoomType: 'x',
+                    type: 'area',
+                    events: {
+                        load: function () {}
+                    }
+                },
+                title: {
+                    text: poolName
+                },
+                xAxis: {
+                    type: 'datetime'
+                },
+                yAxis: {
+                    title: {
+                        text: '百分制(%)'
+                    }
+                },
+                legend: {
+                    enabled: false
+                },
+                plotOptions: {
+                    area: {
+                        fillColor: {
+                            linearGradient: {
+                                x1: 0,
+                                y1: 0,
+                                x2: 0,
+                                y2: 1
+                            },
+                            stops: [
+                                [0, Highcharts.getOptions().colors[0]],
+                                [1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
+                            ]
+                        },
+                        marker: {
+                            radius: 2
+                        },
+                        lineWidth: 1,
+                        states: {
+                            hover: {
+                                lineWidth: 1
+                            }
+                        },
+                        threshold: null
+                    }
+                },
+                series: data
+            });
+        }
+        function convertDate(series) {
+            series.forEach(function (serie) {
+                var data = serie.data;
+                data.forEach(function (item) {
+                    lastDate = item[0];
+                    item[0] = toUTC(item[0]);
+                });
+            });
+        }
+        function toUTC(date) {
+            var date = new Date(date);
+            return Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDay(), date.getUTCHours(), date.getUTCMinutes(), date.getUTCSeconds());
+        }
+    </script>
+</head>
+<body>
+<script src="http://cdn.hcharts.cn/highcharts/highcharts.js"></script>
+<script src="http://cdn.hcharts.cn/highcharts/modules/exporting.js"></script>
+
+</body>
+</html>
