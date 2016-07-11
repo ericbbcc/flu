@@ -10,31 +10,16 @@
 <script src="http://cdn.hcharts.cn/highcharts/modules/exporting.js"></script>
 <script type="text/javascript">
     var lastDate = undefined;
-    var charts = new Object();
     $(function () {
         $.getJSON('/flu?cfg=get', function (data) {
             initChartsTags(data.poolKeys);
             $.getJSON('/flu?json=data', function (data) {
                 for (var pooName in data) {
-                    charts[pooName] = makeCharts(pooName, data[pooName]);
+                    makeCharts(pooName, data[pooName]);
                 }
-                setInterval(function () {
-                    var url = lastDate == undefined ? '/flu?json=data' : '/flu?json=data&fromDate=' + lastDate;
-                    $.getJSON(url, function (data) {
-                        for (var pooName in data) {
-                            var chart = $('#' + pooName).highcharts();
-                            var series = chart.series;
-                            for (var i = 0 ; i < data[pooName].length; i++) {
-                                var serie = series[i];
-                                var rserie = data[pooName][i];
-                                rserie.data.forEach(function (item) {
-                                    lastDate = item[0];
-                                    serie.addPoint([lastDate, item[1]], true, true);
-                                });
-                            }
-                        }
-                    });
-                }, data.interval);
+                if (data.autoRefresh) {
+                    doAutoRefresh(data.interval);
+                }
             });
         });
     });
@@ -100,6 +85,25 @@
             },
             series: data
         });
+    }
+    function doAutoRefresh(interval) {
+        setInterval(function () {
+            var url = lastDate == undefined ? '/flu?json=data' : '/flu?json=data&fromDate=' + lastDate;
+            $.getJSON(url, function (data) {
+                for (var pooName in data) {
+                    var chart = $('#' + pooName).highcharts();
+                    var series = chart.series;
+                    for (var i = 0 ; i < data[pooName].length; i++) {
+                        var serie = series[i];
+                        var rserie = data[pooName][i];
+                        rserie.data.forEach(function (item) {
+                            lastDate = item[0];
+                            serie.addPoint([lastDate, item[1]], true, true);
+                        });
+                    }
+                }
+            });
+        }, interval);
     }
     function convertDate(series) {
         series.forEach(function (serie) {

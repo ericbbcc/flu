@@ -18,11 +18,6 @@ public class StaInfoCenter {
     private StaInfoUpdateListener staInfoUpdateListener = new WebStaInfoUpdateListener();
 
     private ConfigurationBean configurationBean = new ConfigurationBean();
-
-    public void setConfigurationBean(ConfigurationBean configurationBean) {
-        this.configurationBean = configurationBean;
-    }
-
     /**
      * 线程池的统计信息
      */
@@ -110,6 +105,7 @@ public class StaInfoCenter {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("poolKeys", new ArrayList<String>(poolEffInfoList.keySet()));
         jsonObject.put("interval",configurationBean.getInterval());
+        jsonObject.put("autoRefresh", configurationBean.isAutoRefresh());
         return jsonObject;
     }
 

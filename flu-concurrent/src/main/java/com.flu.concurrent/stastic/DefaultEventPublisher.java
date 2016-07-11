@@ -16,7 +16,6 @@ import java.util.concurrent.locks.LockSupport;
 public class DefaultEventPublisher implements EventPublisher, Runnable {
 
     private Thread thread;
-    private long parkTime = TimeUnit.SECONDS.toNanos(1);
 
     /**
      * 线程池名 -> 线程池
@@ -108,6 +107,7 @@ public class DefaultEventPublisher implements EventPublisher, Runnable {
     @SuppressWarnings("Since15")
     public void run() {
         while (true) {
+            long parkTime = TimeUnit.MILLISECONDS.toNanos(StaInfoCenter.mySelf().getConfiguration().getInterval());
             LockSupport.parkNanos(thread, parkTime);
             collectStaInfo();
         }

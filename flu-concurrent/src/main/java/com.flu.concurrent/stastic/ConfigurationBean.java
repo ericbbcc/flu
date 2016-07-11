@@ -16,4 +16,8 @@ public class ConfigurationBean {
      * 内存缓存次数,默认600
      */
     private long cacheCount = 600;
+    /**
+     * 是否自动刷新,默认为不自动刷新
+     */
+    private boolean autoRefresh = false;
 }
