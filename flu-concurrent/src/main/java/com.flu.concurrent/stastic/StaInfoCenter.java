@@ -1,6 +1,7 @@
 package com.flu.concurrent.stastic;
 
 
+import com.alibaba.fastjson.JSONObject;
 import com.flu.concurrent.web.WebStaInfoUpdateListener;
 
 import java.util.*;
@@ -15,6 +16,12 @@ public class StaInfoCenter {
     private static StaInfoCenter staInfoCenter = new StaInfoCenter();
 
     private StaInfoUpdateListener staInfoUpdateListener = new WebStaInfoUpdateListener();
+
+    private ConfigurationBean configurationBean = new ConfigurationBean();
+
+    public void setConfigurationBean(ConfigurationBean configurationBean) {
+        this.configurationBean = configurationBean;
+    }
 
     /**
      * 线程池的统计信息
@@ -35,7 +42,7 @@ public class StaInfoCenter {
             staItem.setType("area");
             staItem.setName("效率");
             staItem.setInnerType("EFF");
-            staItem.setData(new FixSizeLinkedList());
+            staItem.setData(new FixSizeLinkedList(configurationBean.getCacheCount()));
             staItems.add(staItem);
             poolEffInfoList.put(poolName, staItems);
         }
@@ -76,7 +83,7 @@ public class StaInfoCenter {
                 tmpStaItem.setInnerType(staItem.getInnerType());
                 tmpStaItem.setName(staItem.getName());
                 tmpStaItem.setType(staItem.getType());
-                tmpStaItem.setData(new FixSizeLinkedList());
+                tmpStaItem.setData(new FixSizeLinkedList(configurationBean.getCacheCount()));
                 Iterator iterator = new ArrayList(staItem.getData()).iterator();
                 while (iterator.hasNext()) {
                     List<Object> node = (List)iterator.next();
@@ -95,12 +102,23 @@ public class StaInfoCenter {
         return stringListMap;
     }
 
-    public List<String> getPoolNames() {
-        return new ArrayList<String>(poolEffInfoList.keySet());
+    public ConfigurationBean getConfiguration() {
+        return configurationBean;
+    }
+
+    public JSONObject getCfgForWeb() {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("poolKeys", new ArrayList<String>(poolEffInfoList.keySet()));
+        jsonObject.put("interval",configurationBean.getInterval());
+        return jsonObject;
     }
 
     private static class FixSizeLinkedList extends LinkedList {
-        private int fixSize = 1800;
+        private long fixSize;
+
+        public FixSizeLinkedList(long fixSize) {
+            this.fixSize = fixSize;
+        }
 
         @Override
         public boolean add(Object o) {

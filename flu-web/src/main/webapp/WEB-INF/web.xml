@@ -13,11 +13,15 @@
    <servlet>
       <servlet-name>flu</servlet-name>
       <servlet-class>com.flu.concurrent.web.FluConcurrentServlet</servlet-class>
+      <init-param>
+         <param-name>interval</param-name>
+         <param-value>10000</param-value>
+      </init-param>
    </servlet>
    
    <servlet-mapping>
       <servlet-name>flu</servlet-name>
-      <url-pattern>/*</url-pattern>
+      <url-pattern>/flu/*</url-pattern>
    </servlet-mapping>
    
    <servlet-mapping>
