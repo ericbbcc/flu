@@ -9,11 +9,11 @@ import lombok.Data;
 @Data
 public class ConfigurationBean {
     /**
-     * 统计时间间隔,单位毫秒
+     * 统计时间间隔,单位毫秒,默认一秒
      */
-    private long interval;
+    private long interval = 1000;
     /**
-     * 内存缓存次数
+     * 内存缓存次数,默认600
      */
-    private long cacheCount;
+    private long cacheCount = 600;
 }

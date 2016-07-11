@@ -66,14 +66,12 @@ public class FluConcurrentServlet extends HttpServlet {
 
 
     private void initConfiguration() {
-        ConfigurationBean configurationBean = new ConfigurationBean();
         if (getInitParameter("interval") != null) {
-            configurationBean.setInterval(Long.valueOf(getInitParameter("interval")));
+            staInfoCenter.getConfiguration().setInterval(Long.valueOf(getInitParameter("interval")));
         }
         if (getInitParameter("cacheCount") != null) {
-            configurationBean.setInterval(Long.valueOf(getInitParameter("cacheCount")));
+            staInfoCenter.getConfiguration().setInterval(Long.valueOf(getInitParameter("cacheCount")));
         }
-        staInfoCenter.setConfigurationBean(configurationBean);
     }
 
     private void setHTML(HttpServletResponse resp) {
